@@ -1,7 +1,7 @@
 import streamlit as st
 
 # 設定網頁標題
-st.set_page_config(page_title="學術獎勵金試算", page_icon="")
+st.set_page_config(page_title="期刊論文申請獎勵金額試算系統", page_icon="")
 
 # 主標題
 st.title("國立臺中科技大學研究發展處")
@@ -72,6 +72,7 @@ st.subheader("本篇申請獎勵金額試算結果：")
 st.title(f":green[${my_money:,} 元]")
 
 st.info(f"計算基礎：{category} 類(每篇獎勵金上限 ${total_reward:,} 元)")
+
 
 
 
