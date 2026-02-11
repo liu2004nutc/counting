@@ -67,8 +67,9 @@ my_money = calculate_precise()
 
 st.divider()
 
-st.subheader("您的試算結果：")
+st.subheader("本篇申請獎勵金額試算結果：")
 st.title(f":green[${my_money:,} 元]")
 
-st.info(f"計算基礎：{category} 類 (${total_reward:,} 元)")
+st.info(f"計算基礎：{category} 類每篇獎勵金上限 (${total_reward:,} 元)")
 st.caption("※ 本版本已針對 A 類 10 人 (1333, 1167...) 之進位邏輯進行優化。")
+
