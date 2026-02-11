@@ -4,7 +4,7 @@ import streamlit as st
 st.set_page_config(page_title="學術獎勵金試算", page_icon="")
 
 # 主標題
-st.title("國立臺中科技大學研究發展處期")
+st.title("國立臺中科技大學研究發展處")
 st.title("期刊論文申請獎勵金額試算系統")
 st.write("請由上而下輸入資訊，系統將依照校準後的公式計算。")
 
@@ -73,6 +73,7 @@ st.title(f":green[${my_money:,} 元]")
 
 st.info(f"計算基礎：{category} 類(每篇獎勵金上限 ${total_reward:,} 元)")
 st.caption("※ 本版本已針對 A 類 10 人 (1333, 1167...) 之進位邏輯進行優化。")
+
 
 
 
