@@ -3,66 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>期刊論文獎勵金試算 - 國立臺中科技大學</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>期刊論文申請獎勵金額試算系統</title>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #f8f9fa; padding-top: 50px; }
-        .card { border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .result-box { background-color: #e8f5e9; border-radius: 10px; padding: 20px; text-align: center; margin-top: 20px; }
-        .result-amount { color: #2e7d32; font-size: 2.5rem; font-weight: bold; }
+        :root {
+            --primary-color: #ff4b4b; /* Streamlit 紅 */
+            --text-color: #31333f;
+            --bg-color: #ffffff;
+        }
+        body {
+            font-family: 'Source Sans Pro', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .main-container {
+            max-width: 700px;
+            width: 100%;
+            padding: 40px 20px;
+        }
+        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; font-weight: 600; }
+        .subtitle { color: #555; margin-bottom: 2rem; }
+        .divider {
+            border-bottom: 1px solid #e6e9ef;
+            margin: 2rem 0;
+        }
+        .input-group { margin-bottom: 1.5rem; }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            font-weight: 400;
+        }
+        select, input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #dcdcdc;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            background-color: #f0f2f6; /* 模擬 Streamlit 輸入框顏色 */
+            box-sizing: border-box;
+        }
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background-color: white;
+        }
+        .result-label { font-size: 1.2rem; margin-top: 2rem; font-weight: 600; }
+        .result-amount {
+            color: #2e7d32; /* Streamlit :green[] 的顏色 */
+            font-size: 3rem;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+        .info-box {
+            background-color: #e7f4ff; /* 模擬 st.info */
+            border-radius: 0.5rem;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #004085;
+        }
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card p-4">
-                <h5 class="text-center text-secondary">國立臺中科技大學研究發展處</h5>
-                <h3 class="text-center mb-4">期刊論文申請獎勵金額試算系統</h3>
-                <hr>
-                
-                <div class="mb-3">
-                    <label class="form-label">1. 申請類別</label>
-                    <select id="category" class="form-select" onchange="calculate()">
-                        <option value="30000">A (30,000元)</option>
-                        <option value="20000" selected>B1 (20,000元)</option>
-                        <option value="12000">B2 (12,000元)</option>
-                    </select>
-                </div>
 
-                <div class="mb-3">
-                    <label class="form-label">2. 作者總人數</label>
-                    <input type="number" id="total_authors" class="form-control" value="1" min="1" oninput="calculate()">
-                </div>
+<div class="main-container">
+    <h1 style="font-size: 1.8rem; color: #31333F;">國立臺中科技大學研究發展處</h1>
+    <h1>期刊論文申請獎勵金額試算系統</h1>
+    <p class="subtitle">請由上而下輸入資訊，系統將依照校準後的公式計算。</p>
 
-                <div class="mb-3">
-                    <label class="form-label">3. 您的作者順位</label>
-                    <input type="number" id="my_pos" class="form-control" value="1" min="1" oninput="calculate()">
-                </div>
+    <div class="divider"></div>
 
-                <div class="mb-3">
-                    <label class="form-label">4. 通訊作者順位</label>
-                    <input type="number" id="corr_pos" class="form-control" value="1" min="1" oninput="calculate()">
-                </div>
+    <div class="input-group">
+        <label>1. 申請類別</label>
+        <select id="category" onchange="calculate()">
+            <option value="30000" selected>A</option>
+            <option value="20000">B1</option>
+            <option value="12000">B2</option>
+        </select>
+    </div>
 
-                <div class="result-box">
-                    <h5>試算結果：</h5>
-                    <div class="result-amount" id="result">$30,000</div>
-                </div>
-                <p class="text-muted mt-3 small text-center">計算邏輯：與校準後公式一致</p>
-            </div>
-        </div>
+    <div class="input-group">
+        <label>2. 作者總人數</label>
+        <input type="number" id="total_authors" value="1" min="1" max="50" oninput="calculate()">
+    </div>
+
+    <div class="input-group">
+        <label>3. 您的作者順位</label>
+        <input type="number" id="my_pos" value="1" min="1" oninput="calculate()">
+    </div>
+
+    <div class="input-group">
+        <label>4. 通訊作者順位</label>
+        <input type="number" id="corr_pos" value="1" min="1" oninput="calculate()">
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="result-label">本篇申請獎勵金額試算結果：</div>
+    <div class="result-amount" id="result">$30,000 元</div>
+
+    <div id="info" class="info-box">
+        計算基礎：A 類 (每篇獎勵金上限 $30,000 元)
     </div>
 </div>
 
 <script>
 function calculate() {
-    const totalReward = parseInt(document.getElementById('category').value);
+    const catSelect = document.getElementById('category');
+    const totalReward = parseInt(catSelect.value);
+    const catName = catSelect.options[catSelect.selectedIndex].text;
     const n = parseInt(document.getElementById('total_authors').value);
     const me = parseInt(document.getElementById('my_pos').value);
     const cp = parseInt(document.getElementById('corr_pos').value);
 
-    // 防呆處理
+    // 更新資訊欄
+    document.getElementById('info').innerText = `計算基礎：${catName} 類 (每篇獎勵金上限 $${totalReward.toLocaleString()} 元)`;
+
     if (me > n || cp > n || n < 1) {
         document.getElementById('result').innerText = "輸入錯誤";
         return;
@@ -75,13 +136,12 @@ function calculate() {
         finalAmount = totalReward;
     } else if (n === 2) {
         if (cp === 1) {
-            let r1 = Math.round(totalReward * 0.8);
+            let r1 = Math.round(total_reward_calc(totalReward) * 0.8);
             finalAmount = (me === 1) ? r1 : (totalReward - r1);
         } else {
             finalAmount = Math.round(totalReward * 0.5);
         }
     } else {
-        // 3人以上邏輯
         if (cp === 1) {
             results[0] = Math.round(totalReward * 0.8);
         } else {
@@ -111,10 +171,15 @@ function calculate() {
         finalAmount = results[me - 1];
     }
 
-    document.getElementById('result').innerText = "$" + finalAmount.toLocaleString();
+    document.getElementById('result').style.color = "#2e7d32";
+    document.getElementById('result').innerText = "$" + finalAmount.toLocaleString() + " 元";
 }
-// 初始計算
+
+// 輔助函式：為了處理 JS 浮點數誤差
+function total_reward_calc(val) { return val; }
+
 calculate();
 </script>
+
 </body>
 </html>
