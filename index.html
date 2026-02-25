@@ -30,3 +30,123 @@
     <h1>期刊論文申請獎勵金額試算系統</h1>
     <p class="subtitle">請由上而下輸入資訊，系統將依照校準後的公式計算。</p>
     <div class="hr"></div>
+
+    <div class="label">1. 申請類別</div>
+    <select id="category" onchange="calculate()">
+        <option value="30000">A</option>
+        <option value="20000" selected>B1</option>
+        <option value="12000">B2</option>
+    </select>
+
+    <div class="label">2. 作者總人數</div>
+    <div class="number-input-container">
+        <input type="number" id="total_authors" value="1" min="1" max="50" oninput="handleTotalChange()">
+        <button class="btn-step" onclick="stepTotal(-1)">−</button>
+        <button class="btn-step" onclick="stepTotal(1)">+</button>
+    </div>
+
+    <div class="label">3. 您的作者順位</div>
+    <div class="number-input-container">
+        <input type="number" id="my_pos" value="1" min="1" oninput="validateRange('my_pos')">
+        <button class="btn-step" onclick="step('my_pos', -1)">−</button>
+        <button class="btn-step" onclick="step('my_pos', 1)">+</button>
+    </div>
+
+    <div class="label">4. 通訊作者順位</div>
+    <div class="number-input-container">
+        <input type="number" id="corr_pos" value="1" min="1" oninput="validateRange('corr_pos')">
+        <button class="btn-step" onclick="step('corr_pos', -1)">−</button>
+        <button class="btn-step" onclick="step('corr_pos', 1)">+</button>
+    </div>
+
+    <div class="hr"></div>
+    <div class="result-title">本篇申請獎勵金額試算結果：</div>
+    <div class="result-amount" id="result">$20,000 元</div>
+    <div id="info" class="info-box">計算基礎：B1 類 (每篇獎勵金上限 $20,000 元)</div>
+</div>
+
+<script>
+// 當總人數改變時，同步限制順位的最大值
+function handleTotalChange() {
+    const total = Math.max(1, parseInt(document.getElementById('total_authors').value) || 1);
+    document.getElementById('total_authors').value = total;
+    
+    // 更新順位輸入框的最大限制
+    ['my_pos', 'corr_pos'].forEach(id => {
+        const el = document.getElementById(id);
+        el.max = total;
+        if (parseInt(el.value) > total) { el.value = total; }
+        if (parseInt(el.value) < 1) { el.value = 1; }
+    });
+    calculate();
+}
+
+function validateRange(id) {
+    const total = parseInt(document.getElementById('total_authors').value) || 1;
+    const el = document.getElementById(id);
+    let val = parseInt(el.value);
+    if (val > total) el.value = total;
+    if (val < 1) el.value = 1;
+    calculate();
+}
+
+function stepTotal(delta) {
+    const el = document.getElementById('total_authors');
+    el.value = Math.max(1, (parseInt(el.value) || 1) + delta);
+    handleTotalChange();
+}
+
+function step(id, delta) {
+    const total = parseInt(document.getElementById('total_authors').value) || 1;
+    const el = document.getElementById(id);
+    let val = (parseInt(el.value) || 1) + delta;
+    el.value = Math.min(Math.max(1, val), total);
+    calculate();
+}
+
+function calculate() {
+    const catSelect = document.getElementById('category');
+    const totalReward = parseInt(catSelect.value);
+    const catName = catSelect.options[catSelect.selectedIndex].text;
+    const n = parseInt(document.getElementById('total_authors').value) || 1;
+    const me = parseInt(document.getElementById('my_pos').value) || 1;
+    const cp = parseInt(document.getElementById('corr_pos').value) || 1;
+
+    document.getElementById('info').innerText = `計算基礎：${catName} 類 (每篇獎勵金上限 $${totalReward.toLocaleString()} 元)`;
+
+    let finalAmount = 0;
+    if (n === 1) {
+        finalAmount = totalReward;
+    } else if (n === 2) {
+        if (cp === 1) {
+            let r1 = Math.round(totalReward * 0.8);
+            finalAmount = (me === 1) ? r1 : (totalReward - r1);
+        } else {
+            finalAmount = Math.round(totalReward * 0.5);
+        }
+    } else {
+        let results = new Array(n).fill(0);
+        if (cp === 1) { results[0] = Math.round(totalReward * 0.8); } 
+        else {
+            results[0] = Math.round(totalReward * 0.4);
+            results[cp - 1] = Math.round(totalReward * 0.4);
+        }
+        let remMoney = totalReward - results.reduce((a, b) => a + b, 0);
+        let remIndices = [];
+        for (let i = 0; i < n; i++) if (results[i] === 0) remIndices.push(i);
+        if (remIndices.length > 0) {
+            let weights = remIndices.map((_, i) => remIndices.length - i);
+            let totalW = weights.reduce((a, b) => a + b, 0);
+            remIndices.forEach((rIdx, i) => { results[rIdx] = Math.round(remMoney * weights[i] / totalW); });
+            let diff = totalReward - results.reduce((a, b) => a + b, 0);
+            results[remIndices[0]] += diff;
+        }
+        finalAmount = results[me - 1];
+    }
+    document.getElementById('result').innerText = "$" + (finalAmount || 0).toLocaleString() + " 元";
+}
+// 初始校正
+handleTotalChange();
+</script>
+</body>
+</html>
