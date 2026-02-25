@@ -3,145 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>期刊論文申請獎勵金額試算系統</title>
-    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
+    <title>期刊論文獎勵金試算系統</title>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary-color: #ff4b4b; /* Streamlit 紅 */
-            --text-color: #31333f;
-            --bg-color: #ffffff;
-        }
         body {
+            background-color: #0e1117; /* Streamlit 深色背景 */
+            color: #ffffff;
             font-family: 'Source Sans Pro', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
             display: flex;
             justify-content: center;
-        }
-        .main-container {
-            max-width: 700px;
-            width: 100%;
+            margin: 0;
             padding: 40px 20px;
         }
-        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; font-weight: 600; }
-        .subtitle { color: #555; margin-bottom: 2rem; }
-        .divider {
-            border-bottom: 1px solid #e6e9ef;
-            margin: 2rem 0;
-        }
-        .input-group { margin-bottom: 1.5rem; }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
-            font-weight: 400;
-        }
-        select, input {
+        .container { max-width: 700px; width: 100%; }
+        h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 10px; }
+        .subtitle { color: #fafafa; opacity: 0.8; margin-bottom: 30px; font-size: 1rem; }
+        .hr { border-bottom: 1px solid #31333f; margin: 30px 0; }
+        
+        .label { font-size: 0.9rem; margin-bottom: 8px; font-weight: 400; color: #ffffff; }
+        
+        /* 模擬 Streamlit 下拉選單 */
+        select {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #dcdcdc;
-            border-radius: 0.5rem;
+            padding: 12px;
+            background-color: #262730;
+            border: 1px solid #41444c;
+            border-radius: 8px;
+            color: white;
             font-size: 1rem;
-            background-color: #f0f2f6; /* 模擬 Streamlit 輸入框顏色 */
-            box-sizing: border-box;
+            appearance: none;
+            cursor: pointer;
+            margin-bottom: 25px;
         }
-        select:focus, input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            background-color: white;
+
+        /* 模擬 Streamlit 帶加減按鈕的輸入框 */
+        .number-input-container {
+            display: flex;
+            align-items: center;
+            background-color: #262730;
+            border: 1px solid #41444c;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            overflow: hidden;
         }
-        .result-label { font-size: 1.2rem; margin-top: 2rem; font-weight: 600; }
-        .result-amount {
-            color: #2e7d32; /* Streamlit :green[] 的顏色 */
-            font-size: 3rem;
-            font-weight: 700;
-            margin: 10px 0;
+        .btn-step {
+            background: none;
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            opacity: 0.6;
         }
+        .btn-step:hover { opacity: 1; background-color: #31333f; }
+        input[type=number] {
+            flex-grow: 1;
+            background: none;
+            border: none;
+            color: white;
+            text-align: left;
+            padding: 12px;
+            font-size: 1rem;
+            -moz-appearance: textfield;
+        }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+        .result-title { font-size: 1.5rem; font-weight: 700; margin-top: 40px; }
+        .result-amount { color: #21c35d; font-size: 3.5rem; font-weight: 700; margin: 15px 0; }
+        
+        /* 模擬 st.info 藍色框 */
         .info-box {
-            background-color: #e7f4ff; /* 模擬 st.info */
-            border-radius: 0.5rem;
+            background-color: rgba(28, 131, 225, 0.1);
+            border: 1px solid rgba(28, 131, 225, 0.2);
+            border-radius: 8px;
             padding: 15px;
-            margin-top: 20px;
+            color: #80c2ff;
             font-size: 0.9rem;
-            color: #004085;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
 
-<div class="main-container">
-    <h1 style="font-size: 1.8rem; color: #31333F;">國立臺中科技大學研究發展處</h1>
+<div class="container">
+    <h1>國立臺中科技大學研究發展處</h1>
     <h1>期刊論文申請獎勵金額試算系統</h1>
     <p class="subtitle">請由上而下輸入資訊，系統將依照校準後的公式計算。</p>
+    
+    <div class="hr"></div>
 
-    <div class="divider"></div>
+    <div class="label">申請類別</div>
+    <select id="category" onchange="calculate()">
+        <option value="30000">A</option>
+        <option value="20000" selected>B1</option>
+        <option value="12000">B2</option>
+    </select>
 
-    <div class="input-group">
-        <label>1. 申請類別</label>
-        <select id="category" onchange="calculate()">
-            <option value="30000" selected>A</option>
-            <option value="20000">B1</option>
-            <option value="12000">B2</option>
-        </select>
+    <div class="label">作者總人數</div>
+    <div class="number-input-container">
+        <input type="number" id="total_authors" value="1" oninput="calculate()">
+        <button class="btn-step" onclick="step('total_authors', -1)">−</button>
+        <button class="btn-step" onclick="step('total_authors', 1)">+</button>
     </div>
 
-    <div class="input-group">
-        <label>2. 作者總人數</label>
-        <input type="number" id="total_authors" value="1" min="1" max="50" oninput="calculate()">
+    <div class="label">您的作者順位</div>
+    <div class="number-input-container">
+        <input type="number" id="my_pos" value="1" oninput="calculate()">
+        <button class="btn-step" onclick="step('my_pos', -1)">−</button>
+        <button class="btn-step" onclick="step('my_pos', 1)">+</button>
     </div>
 
-    <div class="input-group">
-        <label>3. 您的作者順位</label>
-        <input type="number" id="my_pos" value="1" min="1" oninput="calculate()">
+    <div class="label">通訊作者順位</div>
+    <div class="number-input-container">
+        <input type="number" id="corr_pos" value="1" oninput="calculate()">
+        <button class="btn-step" onclick="step('corr_pos', -1)">−</button>
+        <button class="btn-step" onclick="step('corr_pos', 1)">+</button>
     </div>
 
-    <div class="input-group">
-        <label>4. 通訊作者順位</label>
-        <input type="number" id="corr_pos" value="1" min="1" oninput="calculate()">
-    </div>
+    <div class="hr"></div>
 
-    <div class="divider"></div>
-
-    <div class="result-label">本篇申請獎勵金額試算結果：</div>
-    <div class="result-amount" id="result">$30,000 元</div>
+    <div class="result-title">本篇申請獎勵金額試算結果：</div>
+    <div class="result-amount" id="result">$20,000 元</div>
 
     <div id="info" class="info-box">
-        計算基礎：A 類 (每篇獎勵金上限 $30,000 元)
+        計算基礎：B1 類 (每篇獎勵金上限 $20,000 元)
     </div>
 </div>
 
 <script>
+function step(id, delta) {
+    const el = document.getElementById(id);
+    let val = parseInt(el.value) || 0;
+    val = Math.max(1, val + delta);
+    el.value = val;
+    calculate();
+}
+
 function calculate() {
     const catSelect = document.getElementById('category');
     const totalReward = parseInt(catSelect.value);
     const catName = catSelect.options[catSelect.selectedIndex].text;
-    const n = parseInt(document.getElementById('total_authors').value);
-    const me = parseInt(document.getElementById('my_pos').value);
-    const cp = parseInt(document.getElementById('corr_pos').value);
+    const n = parseInt(document.getElementById('total_authors').value) || 1;
+    const me = parseInt(document.getElementById('my_pos').value) || 1;
+    const cp = parseInt(document.getElementById('corr_pos').value) || 1;
 
-    // 更新資訊欄
     document.getElementById('info').innerText = `計算基礎：${catName} 類 (每篇獎勵金上限 $${totalReward.toLocaleString()} 元)`;
 
-    if (me > n || cp > n || n < 1) {
+    let finalAmount = 0;
+    if (me > n || cp > n) {
         document.getElementById('result').innerText = "輸入錯誤";
         return;
     }
-
-    let results = new Array(n).fill(0);
-    let finalAmount = 0;
 
     if (n === 1) {
         finalAmount = totalReward;
     } else if (n === 2) {
         if (cp === 1) {
-            let r1 = Math.round(total_reward_calc(totalReward) * 0.8);
+            let r1 = Math.round(totalReward * 0.8);
             finalAmount = (me === 1) ? r1 : (totalReward - r1);
         } else {
             finalAmount = Math.round(totalReward * 0.5);
         }
     } else {
+        let results = new Array(n).fill(0);
         if (cp === 1) {
             results[0] = Math.round(totalReward * 0.8);
         } else {
@@ -149,37 +173,25 @@ function calculate() {
             results[cp - 1] = Math.round(totalReward * 0.4);
         }
 
-        let currentSum = results.reduce((a, b) => a + b, 0);
-        let remMoney = totalReward - currentSum;
+        let remMoney = totalReward - results.reduce((a, b) => a + b, 0);
         let remIndices = [];
-        for (let i = 0; i < n; i++) { if (results[i] === 0) remIndices.push(i); }
+        for (let i = 0; i < n; i++) if (results[i] === 0) remIndices.push(i);
 
         if (remIndices.length > 0) {
-            let numRem = remIndices.length;
-            let weights = [];
-            for (let i = 0; i < numRem; i++) { weights.push(numRem - i); }
+            let weights = remIndices.map((_, i) => remIndices.length - i);
             let totalW = weights.reduce((a, b) => a + b, 0);
-
-            for (let i = 0; i < remIndices.length; i++) {
-                results[remIndices[i]] = Math.round(remMoney * weights[i] / totalW);
-            }
-
-            let finalSum = results.reduce((a, b) => a + b, 0);
-            let diff = totalReward - finalSum;
+            remIndices.forEach((rIdx, i) => {
+                results[rIdx] = Math.round(remMoney * weights[i] / totalW);
+            });
+            let diff = totalReward - results.reduce((a, b) => a + b, 0);
             results[remIndices[0]] += diff;
         }
         finalAmount = results[me - 1];
     }
 
-    document.getElementById('result').style.color = "#2e7d32";
     document.getElementById('result').innerText = "$" + finalAmount.toLocaleString() + " 元";
 }
-
-// 輔助函式：為了處理 JS 浮點數誤差
-function total_reward_calc(val) { return val; }
-
 calculate();
 </script>
-
 </body>
 </html>
