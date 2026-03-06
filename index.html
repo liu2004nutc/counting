@@ -11,15 +11,27 @@
         h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 10px; }
         .subtitle { color: #fafafa; opacity: 0.8; margin-bottom: 30px; font-size: 1rem; }
         .hr { border-bottom: 1px solid #31333f; margin: 30px 0; }
+        
+        /* 標籤與必填紅字樣式 */
         .label { font-size: 0.9rem; margin-bottom: 8px; font-weight: 400; color: #ffffff; }
-        select { width: 100%; padding: 12px; background-color: #262730; border: 1px solid #41444c; border-radius: 8px; color: white; font-size: 1rem; appearance: none; cursor: pointer; margin-bottom: 25px; }
+        .required { color: #ff4b4b; margin-left: 5px; font-size: 0.8rem; }
+
+        select { width: 100%; padding: 12px; background-color: #262730; border: 1px solid #41444c; border-radius: 8px; color: white; font-size: 1rem; appearance: none; cursor: pointer; margin-bottom: 25px; outline: none; }
+        
         .number-input-container { display: flex; align-items: center; background-color: #262730; border: 1px solid #41444c; border-radius: 8px; margin-bottom: 25px; overflow: hidden; }
-        .btn-step { background: none; border: none; color: white; padding: 10px 15px; cursor: pointer; font-size: 1.2rem; opacity: 0.6; }
+        .btn-step { background: none; border: none; color: white; padding: 10px 15px; cursor: pointer; font-size: 1.2rem; opacity: 0.6; width: 50px; }
         .btn-step:hover { opacity: 1; background-color: #31333f; }
-        input[type=number] { flex-grow: 1; background: none; border: none; color: white; text-align: left; padding: 12px; font-size: 1rem; -moz-appearance: textfield; }
+        
+        input[type=number] { flex-grow: 1; background: none; border: none; color: white; text-align: left; padding: 12px; font-size: 1rem; -moz-appearance: textfield; outline: none; }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input::placeholder { color: #808495; }
+
         .result-title { font-size: 1.5rem; font-weight: 700; margin-top: 40px; }
-        .result-amount { color: #21c35d; font-size: 3.5rem; font-weight: 700; margin: 15px 0; }
+        
+        /* 結果顯示樣式 */
+        .result-amount { color: #21c35d; font-size: 3.5rem; font-weight: 700; margin: 15px 0; transition: color 0.3s; }
+        .result-amount.invalid { color: #808495; font-size: 2.2rem; } /* 資訊不全時縮小字體變灰色 */
+        
         .info-box { background-color: rgba(28, 131, 225, 0.1); border: 1px solid rgba(28, 131, 225, 0.2); border-radius: 8px; padding: 15px; color: #80c2ff; font-size: 0.9rem; margin-top: 20px; }
     </style>
 </head>
@@ -31,30 +43,30 @@
     <p class="subtitle">請由上而下輸入資訊，系統將依照校準後的公式計算。</p>
     <div class="hr"></div>
 
-    <div class="label">1. 申請類別</div>
+    <div class="label">1. 申請類別<span class="required">(必填)</span></div>
     <select id="category" onchange="calculate()">
         <option value="30000">A</option>
         <option value="20000" selected>B1</option>
         <option value="12000">B2</option>
     </select>
 
-    <div class="label">2. 作者總人數</div>
+    <div class="label">2. 作者總人數<span class="required">(必填)</span></div>
     <div class="number-input-container">
-        <input type="number" id="total_authors" value="1" min="1" max="50" oninput="handleTotalChange()">
+        <input type="number" id="total_authors" value="1" min="1" max="50" placeholder="請輸入人數" oninput="handleTotalChange()">
         <button class="btn-step" onclick="stepTotal(-1)">−</button>
         <button class="btn-step" onclick="stepTotal(1)">+</button>
     </div>
 
-    <div class="label">3. 您的作者順位</div>
+    <div class="label">3. 您的作者順位<span class="required">(必填)</span></div>
     <div class="number-input-container">
-        <input type="number" id="my_pos" value="1" min="1" oninput="validateRange('my_pos')">
+        <input type="number" id="my_pos" value="1" min="1" placeholder="請輸入順位" oninput="validateRange('my_pos')">
         <button class="btn-step" onclick="step('my_pos', -1)">−</button>
         <button class="btn-step" onclick="step('my_pos', 1)">+</button>
     </div>
 
-    <div class="label">4. 通訊作者順位</div>
+    <div class="label">4. 通訊作者順位<span class="required">(必填)</span></div>
     <div class="number-input-container">
-        <input type="number" id="corr_pos" value="1" min="1" oninput="validateRange('corr_pos')">
+        <input type="number" id="corr_pos" value="1" min="1" placeholder="請輸入順位" oninput="validateRange('corr_pos')">
         <button class="btn-step" onclick="step('corr_pos', -1)">−</button>
         <button class="btn-step" onclick="step('corr_pos', 1)">+</button>
     </div>
@@ -66,25 +78,32 @@
 </div>
 
 <script>
-// 當總人數改變時，同步限制順位的最大值
 function handleTotalChange() {
-    const total = Math.max(1, parseInt(document.getElementById('total_authors').value) || 1);
+    let totalInput = document.getElementById('total_authors').value;
+    if (totalInput === "") { calculate(); return; }
+    
+    let total = Math.max(1, parseInt(totalInput) || 1);
     document.getElementById('total_authors').value = total;
     
-    // 更新順位輸入框的最大限制
     ['my_pos', 'corr_pos'].forEach(id => {
-        const el = document.getElementById(id);
-        el.max = total;
-        if (parseInt(el.value) > total) { el.value = total; }
-        if (parseInt(el.value) < 1) { el.value = 1; }
+        let el = document.getElementById(id);
+        if (el.value !== "") {
+            let val = parseInt(el.value);
+            if (val > total) el.value = total;
+            if (val < 1) el.value = 1;
+        }
     });
     calculate();
 }
 
 function validateRange(id) {
+    let valInput = document.getElementById(id).value;
+    if (valInput === "") { calculate(); return; }
+
     const total = parseInt(document.getElementById('total_authors').value) || 1;
     const el = document.getElementById(id);
     let val = parseInt(el.value);
+    
     if (val > total) el.value = total;
     if (val < 1) el.value = 1;
     calculate();
@@ -92,15 +111,17 @@ function validateRange(id) {
 
 function stepTotal(delta) {
     const el = document.getElementById('total_authors');
-    el.value = Math.max(1, (parseInt(el.value) || 1) + delta);
+    let current = parseInt(el.value) || 0;
+    el.value = Math.max(1, current + delta);
     handleTotalChange();
 }
 
 function step(id, delta) {
     const total = parseInt(document.getElementById('total_authors').value) || 1;
     const el = document.getElementById(id);
-    let val = (parseInt(el.value) || 1) + delta;
-    el.value = Math.min(Math.max(1, val), total);
+    let current = parseInt(el.value) || 0;
+    let nextVal = current + delta;
+    el.value = Math.min(Math.max(1, nextVal), total);
     calculate();
 }
 
@@ -108,9 +129,24 @@ function calculate() {
     const catSelect = document.getElementById('category');
     const totalReward = parseInt(catSelect.value);
     const catName = catSelect.options[catSelect.selectedIndex].text;
-    const n = parseInt(document.getElementById('total_authors').value) || 1;
-    const me = parseInt(document.getElementById('my_pos').value) || 1;
-    const cp = parseInt(document.getElementById('corr_pos').value) || 1;
+    
+    // 檢查數值是否為空
+    const nStr = document.getElementById('total_authors').value;
+    const meStr = document.getElementById('my_pos').value;
+    const cpStr = document.getElementById('corr_pos').value;
+    
+    const resultDisplay = document.getElementById('result');
+
+    if (nStr === "" || meStr === "" || cpStr === "") {
+        resultDisplay.innerText = "請填寫完整資訊";
+        resultDisplay.classList.add('invalid');
+        return;
+    }
+
+    resultDisplay.classList.remove('invalid');
+    const n = parseInt(nStr);
+    const me = parseInt(meStr);
+    const cp = parseInt(cpStr);
 
     document.getElementById('info').innerText = `計算基礎：${catName} 類 (每篇獎勵金上限 $${totalReward.toLocaleString()} 元)`;
 
@@ -143,10 +179,11 @@ function calculate() {
         }
         finalAmount = results[me - 1];
     }
-    document.getElementById('result').innerText = "$" + (finalAmount || 0).toLocaleString() + " 元";
+    resultDisplay.innerText = "$" + (finalAmount || 0).toLocaleString() + " 元";
 }
+
 // 初始校正
-handleTotalChange();
+calculate();
 </script>
 </body>
 </html>
